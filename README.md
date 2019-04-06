@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/luisdeltoro/arrow-effects-retry.svg?branch=master)](https://travis-ci.org/luisdeltoro/arrow-effects-retry)
+
 # arrow-effects-retry
 
 A library for retrying effects that can fail.
