@@ -12,13 +12,16 @@ class RetriableIoTest : StringSpec() {
 
     override fun isolationMode() = IsolationMode.InstancePerTest
 
+    private val DEFAULT_DURATION = 1L
+    private val DEFAULT_TIMEUNIT = TimeUnit.MILLISECONDS
+
     init {
 
         var functions = mutableListOf(
-            { throw TestException("Failed") },
-            { throw TestException("Failed") },
-            { throw TestException("Failed") },
-            { "Success" }
+            { println("Call 1"); throw TestException("Failed") },
+            { println("Call 2"); throw TestException("Failed") },
+            { println("Call 3"); throw TestException("Failed") },
+            { println("Call 4"); "Success" }
 
         )
         val io = IO {
@@ -28,21 +31,21 @@ class RetriableIoTest : StringSpec() {
         }
 
         "Using a retry strategy with 3 maxRetries on IO that fails three times should succeed" {
-            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(1, TimeUnit.MILLISECONDS), 3)
+            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(DEFAULT_DURATION, DEFAULT_TIMEUNIT), 3)
             val rio = io.retry(retryPolicy)
             val result = rio.attempt().unsafeRunSync()
             result should beRight("Success")
         }
 
         "Using a retry strategy with 2 maxRetries on IO that fails three times should fail" {
-            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(1, TimeUnit.MILLISECONDS), 2)
+            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(DEFAULT_DURATION, DEFAULT_TIMEUNIT), 2)
             val rio = io.retry(retryPolicy)
             val result = rio.attempt().unsafeRunSync()
             result should beLeftOfType<TestException>()
         }
 
         "Using a retry strategy with 1 maxRetries on IO that fails three times should fail" {
-            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(1, TimeUnit.MILLISECONDS), 1)
+            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(DEFAULT_DURATION, DEFAULT_TIMEUNIT), 1)
             val rio = io.retry(retryPolicy)
             val result = rio.attempt().unsafeRunSync()
             result should beLeftOfType<TestException>()
@@ -50,7 +53,7 @@ class RetriableIoTest : StringSpec() {
 
         "Using a retry strategy with 3 maxRetries on IO that fails three times with non-retriable error should fail" {
             val nonRetriableError = { _: Throwable -> false}
-            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(1, TimeUnit.MILLISECONDS), 3, nonRetriableError)
+            val retryPolicy = RetryPolicy.ExponentialBackoff(Delay(DEFAULT_DURATION, DEFAULT_TIMEUNIT), 3, nonRetriableError)
             val rio = io.retry(retryPolicy)
             val result = rio.attempt().unsafeRunSync()
             result should beLeftOfType<TestException>()
