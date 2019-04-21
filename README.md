@@ -6,7 +6,7 @@ A library for retrying effects that can fail.
 
 Designed to work with [arrow IO](https://arrow-kt.io/docs/effects/io/) 
 
-Inspired by the [cats-effect](https://github.com/typelevel/cats-effect) 
+Inspired by [cats-effect](https://github.com/typelevel/cats-effect) 
 and [cats-retry](https://github.com/cb372/cats-retry)
 
 Getting started
